@@ -1,7 +1,7 @@
 # Changelog
 
-<!-- disableFinding(LINE_OVER_80) -->
-<!-- disableFinding(LIST_NO_LINE) -->
+
+
 
 All notable changes to the Google Antigravity Python SDK will be documented in this file.
 

@@ -481,7 +481,7 @@ class ProcessToolCallsTest(absltest.TestCase):
 
     What: Checks that ToolResult.exception holds the original exception object.
     Why: OnToolErrorHook needs the original exception type for isinstance
-      dispatch (b/508736962).
+      dispatch ((internal issue)).
     How: Processes a call to a tool that raises ValueError and asserts the
       exception field is the original ValueError instance.
     """
