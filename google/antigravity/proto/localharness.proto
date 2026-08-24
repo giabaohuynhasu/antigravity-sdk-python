@@ -714,6 +714,7 @@ message PreTurnResult {
 message SubagentSkillsConfig {
   message InheritConfig {
     repeated string extra_skills_paths = 1;
+    repeated string skill_names = 2;
   }
   message NoneConfig {}
   message OverrideConfig {
