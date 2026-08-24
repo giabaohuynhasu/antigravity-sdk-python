@@ -2029,6 +2029,65 @@ class UsageMetadataTest(unittest.TestCase):
     u = types.UsageMetadata(prompt_token_count=10)
     self.assertEqual(u.__add__(1), NotImplemented)
 
+  def test_sub_operator(self):
+    """Verifies that __sub__ subtracts token usage fields correctly."""
+    u1 = types.UsageMetadata(
+        prompt_token_count=300,
+        cached_content_token_count=60,
+        candidates_token_count=70,
+        thoughts_token_count=25,
+        total_token_count=395,
+    )
+    u2 = types.UsageMetadata(
+        prompt_token_count=100,
+        cached_content_token_count=50,
+        candidates_token_count=30,
+        thoughts_token_count=20,
+        total_token_count=150,
+    )
+    res = u1 - u2
+    self.assertEqual(res.prompt_token_count, 200)
+    self.assertEqual(res.cached_content_token_count, 10)
+    self.assertEqual(res.candidates_token_count, 40)
+    self.assertEqual(res.thoughts_token_count, 5)
+    self.assertEqual(res.total_token_count, 245)
+
+  def test_sub_operator_with_none(self):
+    """Verifies that __sub__ treats None fields as zero."""
+    u1 = types.UsageMetadata(
+        prompt_token_count=100,
+    )
+    u2 = types.UsageMetadata(
+        candidates_token_count=50,
+    )
+    res = u1 - u2
+    self.assertEqual(res.prompt_token_count, 100)
+    self.assertEqual(res.cached_content_token_count, 0)
+    self.assertEqual(res.candidates_token_count, -50)
+    self.assertEqual(res.thoughts_token_count, 0)
+    self.assertEqual(res.total_token_count, 0)
+
+  def test_sub_operator_service_tier(self):
+    """Verifies that __sub__ preserves and resolves service_tier correctly."""
+    u_none = types.UsageMetadata()
+    u_std = types.UsageMetadata(service_tier=types.ServiceTier.STANDARD)
+    u_pri = types.UsageMetadata(service_tier=types.ServiceTier.PRIORITY)
+    u_flex = types.UsageMetadata(service_tier=types.ServiceTier.FLEX)
+
+    self.assertEqual((u_pri - u_pri).service_tier, types.ServiceTier.PRIORITY)
+    self.assertEqual((u_flex - u_flex).service_tier, types.ServiceTier.FLEX)
+    self.assertEqual((u_pri - u_none).service_tier, types.ServiceTier.PRIORITY)
+    self.assertEqual((u_none - u_flex).service_tier, types.ServiceTier.FLEX)
+    self.assertEqual((u_pri - u_flex).service_tier, types.ServiceTier.PRIORITY)
+    self.assertEqual((u_flex - u_pri).service_tier, types.ServiceTier.FLEX)
+    self.assertEqual((u_pri - u_std).service_tier, types.ServiceTier.PRIORITY)
+    self.assertIsNone((u_none - u_none).service_tier)
+
+  def test_sub_operator_invalid_type(self):
+    """Verifies that __sub__ returns NotImplemented for invalid types."""
+    u = types.UsageMetadata(prompt_token_count=10)
+    self.assertEqual(u.__sub__(1), NotImplemented)
+
 
 class RetryConfigTest(unittest.TestCase):
   """Tests for RetryConfig presets and explicit configuration."""

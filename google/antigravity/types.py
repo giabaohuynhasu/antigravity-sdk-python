@@ -766,6 +766,7 @@ class UsageMetadata(pydantic.BaseModel):
         - (other.thoughts_token_count or 0),
         total_token_count=(self.total_token_count or 0)
         - (other.total_token_count or 0),
+        service_tier=self.service_tier or other.service_tier,
     )
 
 
