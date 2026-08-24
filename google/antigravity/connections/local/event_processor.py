@@ -784,11 +784,8 @@ class LocalHarnessEventProcessor:
 
       if self._tool_runner:
         try:
-          results = await self._tool_runner.process_tool_calls(
-              [types.ToolCall(name=tc.name, args=tc.args)]
-          )
+          results = await self._tool_runner.process_tool_calls([tc])
           result = results[0]
-          result.id = tool_call.id
         except Exception as e:  # pylint: disable=broad-except
           result = types.ToolResult(
               id=tool_call.id,

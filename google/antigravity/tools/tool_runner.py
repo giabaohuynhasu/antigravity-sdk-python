@@ -365,12 +365,25 @@ class ToolRunner:
       try:
         if tc.name not in self._tools:
           return types.ToolResult(
-              name=tc.name, error=f"Unknown tool: '{tc.name}'"
+              id=tc.id,
+              step_id=tc.step_id,
+              server_name=tc.server_name,
+              name=tc.name,
+              error=f"Unknown tool: '{tc.name}'",
           )
         result = await self.execute(tc.name, **tc.args)
-        return types.ToolResult(name=tc.name, result=result)
+        return types.ToolResult(
+            id=tc.id,
+            step_id=tc.step_id,
+            server_name=tc.server_name,
+            name=tc.name,
+            result=result,
+        )
       except Exception as e:  # pylint: disable=broad-except
         return types.ToolResult(
+            id=tc.id,
+            step_id=tc.step_id,
+            server_name=tc.server_name,
             name=tc.name,
             error=str(e),
             exception=e,

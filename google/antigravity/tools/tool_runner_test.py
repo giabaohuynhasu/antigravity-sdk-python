@@ -481,7 +481,7 @@ class ProcessToolCallsTest(absltest.TestCase):
 
     What: Checks that ToolResult.exception holds the original exception object.
     Why: OnToolErrorHook needs the original exception type for isinstance
-      dispatch ((internal issue)).
+      dispatch.
     How: Processes a call to a tool that raises ValueError and asserts the
       exception field is the original ValueError instance.
     """
@@ -562,6 +562,69 @@ class ProcessToolCallsTest(absltest.TestCase):
     )
     self.assertLen(results, 1)
     self.assertIsNone(results[0].exception)
+
+  def test_process_tool_calls_preserves_metadata(self):
+    """Verifies that id, step_id, and server_name are preserved on ToolResult."""
+    runner = tool_runner.ToolRunner([_sample_tool])
+    results = asyncio.run(
+        runner.process_tool_calls([
+            sdk_types.ToolCall(
+                id="call_123",
+                step_id="step_456",
+                server_name="test_server",
+                name="_sample_tool",
+                args={"arg1": "Antigravity"},
+            )
+        ])
+    )
+    self.assertLen(results, 1)
+    self.assertEqual(results[0].id, "call_123")
+    self.assertEqual(results[0].step_id, "step_456")
+    self.assertEqual(results[0].server_name, "test_server")
+    self.assertEqual(results[0].result, "Hello Antigravity")
+
+  def test_process_tool_calls_failure_preserves_metadata(self):
+    """Verifies that id, step_id, and server_name are preserved on failed ToolResult."""
+
+    def _failing_tool():
+      raise RuntimeError("boom")
+
+    runner = tool_runner.ToolRunner([_failing_tool])
+    results = asyncio.run(
+        runner.process_tool_calls([
+            sdk_types.ToolCall(
+                id="call_fail",
+                step_id="step_fail",
+                server_name="fail_server",
+                name="_failing_tool",
+            )
+        ])
+    )
+    self.assertLen(results, 1)
+    self.assertEqual(results[0].id, "call_fail")
+    self.assertEqual(results[0].step_id, "step_fail")
+    self.assertEqual(results[0].server_name, "fail_server")
+    self.assertEqual(results[0].error, "boom")
+    self.assertIsInstance(results[0].exception, RuntimeError)
+
+  def test_process_tool_calls_unknown_tool_preserves_metadata(self):
+    """Verifies that id, step_id, and server_name are preserved on unknown tool result."""
+    runner = tool_runner.ToolRunner()
+    results = asyncio.run(
+        runner.process_tool_calls([
+            sdk_types.ToolCall(
+                id="call_unknown",
+                step_id="step_unknown",
+                server_name="unknown_server",
+                name="nonexistent_tool",
+            )
+        ])
+    )
+    self.assertLen(results, 1)
+    self.assertEqual(results[0].id, "call_unknown")
+    self.assertEqual(results[0].step_id, "step_unknown")
+    self.assertEqual(results[0].server_name, "unknown_server")
+    self.assertIn("Unknown tool", results[0].error)
 
 
 class ContextInjectionTest(absltest.TestCase):
