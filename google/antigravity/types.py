@@ -100,6 +100,7 @@ __all__ = [
     "Content",
     "ContentPrimitive",
     "from_file",
+    "from_bytes",
     "SlashCommand",
     "BuiltinSlashCommandName",
 ]

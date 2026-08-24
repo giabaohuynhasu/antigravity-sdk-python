@@ -1173,6 +1173,31 @@ class ContentFromFileResolverTest(parameterized.TestCase):
           types.from_file(tmp_file)
 
 
+class ContentFromBytesResolverTest(parameterized.TestCase):
+  """Validates the global from_bytes content resolver helper function."""
+
+  @parameterized.named_parameters(
+      ("image", "image/png", types.Image),
+      ("document", "application/pdf", types.Document),
+      ("audio", "audio/mpeg", types.Audio),
+      ("video", "video/mp4", types.Video),
+  )
+  def test_resolves_from_bytes(self, mime_type, expected_class):
+    """Verifies that bytes and MIME type are resolved to the correct Content primitives."""
+    res = types.from_bytes(
+        b"fake_bytes", mime_type=mime_type, description="byte asset"
+    )
+    self.assertIsInstance(res, expected_class)
+    self.assertEqual(res.mime_type, mime_type)
+    self.assertEqual(res.description, "byte asset")
+    self.assertEqual(res.data, b"fake_bytes")
+
+  def test_unsupported_mime_type_raises_error(self):
+    """Verifies that an unsupported MIME type raises a descriptive ValueError."""
+    with self.assertRaisesRegex(ValueError, "Unsupported MIME type"):
+      types.from_bytes(b"data", mime_type="application/x-unsupported-custom")
+
+
 class ChatResponseStreamTest(unittest.IsolatedAsyncioTestCase):
   """Tests for ChatResponse async stream and caching properties."""
 
