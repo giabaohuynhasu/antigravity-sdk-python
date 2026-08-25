@@ -979,6 +979,39 @@ class SchemaGenerationTest(absltest.TestCase):
     public = runner.get_public_callable("_schema_tool")
     self.assertTrue(tool_runner._is_async(public))
 
+  def test_public_callable_invokes_with_positional_and_keyword_args(self):
+    from google.antigravity.tools import tool_context  # pylint: disable=g-import-not-at-top
+
+    def _sync_tool(
+        a: str, b: int, ctx: tool_context.ToolContext | None = None
+    ) -> str:
+      del ctx
+      return f"{a}:{b}"
+
+    async def _async_tool_with_ctx(
+        a: str, b: int, ctx: tool_context.ToolContext | None = None
+    ) -> str:
+      del ctx
+      return f"{a}:{b}"
+
+    runner = tool_runner.ToolRunner([_sync_tool, _async_tool_with_ctx])
+
+    sync_pub = runner.get_public_callable("_sync_tool")
+    self.assertEqual(sync_pub("foo", 42), "foo:42")
+    self.assertEqual(sync_pub(a="bar", b=10), "bar:10")
+
+    async_pub = runner.get_public_callable("_async_tool_with_ctx")
+    self.assertEqual(asyncio.run(async_pub("foo", 42)), "foo:42")
+    self.assertEqual(asyncio.run(async_pub(a="bar", b=10)), "bar:10")
+
+  def test_tool_with_schema_invokes_with_positional_and_keyword_args(self):
+    def _my_tool(x: int, y: int) -> int:
+      return x * y
+
+    tool = tool_runner.ToolWithSchema(_my_tool, {"type": "object"})
+    self.assertEqual(tool(3, 4), 12)
+    self.assertEqual(tool(x=5, y=6), 30)
+
 
 if __name__ == "__main__":
   absltest.main()

@@ -103,14 +103,14 @@ def _make_public_callable(
   if _is_async(fn):
 
     @functools.wraps(fn)
-    async def _proxy(**kwargs):
-      return await fn(**kwargs)
+    async def _proxy(*args: Any, **kwargs: Any) -> Any:
+      return await fn(*args, **kwargs)
 
   else:
 
     @functools.wraps(fn)
-    def _proxy(**kwargs):
-      return fn(**kwargs)
+    def _proxy(*args: Any, **kwargs: Any) -> Any:
+      return fn(*args, **kwargs)
 
   setattr(_proxy, "__signature__", public_sig)
   return _proxy
@@ -125,8 +125,8 @@ class ToolWithSchema:
     self.__name__ = getattr(fn, "__name__", None) or type(fn).__name__
     self.__doc__ = getattr(fn, "__doc__", None)
 
-  def __call__(self, **kwargs: Any) -> Any:
-    return self.fn(**kwargs)
+  def __call__(self, *args: Any, **kwargs: Any) -> Any:
+    return self.fn(*args, **kwargs)
 
 
 def _is_async(callable_obj: Any) -> bool:
