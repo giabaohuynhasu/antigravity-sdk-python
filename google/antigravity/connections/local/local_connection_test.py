@@ -3509,6 +3509,87 @@ class LocalConnectionCompactionHookTest(unittest.IsolatedAsyncioTestCase):
     self.assertIn(localharness_pb2.LIFECYCLE_HOOK_ON_COMPACTION, enabled)
 
 
+class LocalConnectionStopHookTest(unittest.IsolatedAsyncioTestCase):
+  """Tests for Stop lifecycle hook dispatch."""
+
+  def setUp(self):
+    super().setUp()
+    self.mock_process = mock.MagicMock()
+
+  def test_get_enabled_hooks_includes_stop(self):
+    """Verifies _get_enabled_hooks includes LIFECYCLE_HOOK_STOP."""
+    hr = hook_runner.HookRunner()
+
+    class StopHook(hooks_base.StopHook):
+
+      async def run(self, context, data):
+        return types.StopHookResult()
+
+    hr.register_hook(StopHook())
+    strategy = local_connection.LocalConnectionStrategy(hook_runner=hr)
+    enabled = strategy._get_enabled_hooks()
+    self.assertIn(localharness_pb2.LIFECYCLE_HOOK_STOP, enabled)
+
+  async def test_stop_hook_dispatched_via_local_harness(self):
+    """Verifies StopHook fires and returns StopResult over the wire."""
+    captured = []
+    event = asyncio.Event()
+
+    class CustomStopHook(hooks_base.StopHook):
+
+      async def run(self, context, data):
+        captured.append(data)
+        event.set()
+        return types.StopHookResult(
+            decision=types.StopDecision.CONTINUE,
+            reason="Continue working",
+        )
+
+    hr = hook_runner.HookRunner()
+    hr.register_hook(CustomStopHook())
+
+    harness = test_utils.TestLocalHarness(
+        test_case=self,
+        process=self.mock_process,
+        hook_runner=hr,
+    )
+
+    req = localharness_pb2.CallHookRequest(
+        request_id="req_stop_1",
+        name="Stop",
+        type=localharness_pb2.LIFECYCLE_HOOK_STOP,
+        stop_args=localharness_pb2.StopArgs(
+            response_text="Done with task",
+            trajectory_id="main_traj",
+            continuation_count=0,
+            stop_reason=localharness_pb2.TrajectoryStateUpdate.STOP_REASON_UNSPECIFIED,
+            error_message="",
+        ),
+    )
+    output_event = localharness_pb2.OutputEvent(call_hook_request=req)
+    await harness.send_event(output_event)
+
+    await asyncio.wait_for(event.wait(), timeout=1.0)
+    self.assertEqual(len(captured), 1)
+    self.assertEqual(captured[0].response_text, "Done with task")
+    self.assertEqual(captured[0].trajectory_id, "main_traj")
+    self.assertEqual(captured[0].continuation_count, 0)
+    self.assertEqual(captured[0].stop_reason, types.StopReason.UNSPECIFIED)
+
+    resp = await harness.wait_for_response(timeout=1.0)
+    self.assertIn("callHookResponse", resp)
+    self.assertEqual(resp["callHookResponse"]["requestId"], "req_stop_1")
+    self.assertIn("stopResult", resp["callHookResponse"])
+    self.assertEqual(
+        resp["callHookResponse"]["stopResult"]["decision"],
+        "CONTINUE",
+    )
+    self.assertEqual(
+        resp["callHookResponse"]["stopResult"]["reason"],
+        "Continue working",
+    )
+
+
 class LocalConnectionSubagentHookTest(unittest.IsolatedAsyncioTestCase):
   """Tests for subagent hook dispatch via tool hooks.
 

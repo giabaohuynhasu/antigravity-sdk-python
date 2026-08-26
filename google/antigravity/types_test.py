@@ -2225,5 +2225,76 @@ class BudgetEnforcementTypesTest(absltest.TestCase):
     )
 
 
+class StopHookTypesTest(absltest.TestCase):
+  """Tests for StopDecision, StopHookResult, and StopArgs."""
+
+  def test_stop_decision_enum(self):
+    self.assertEqual(types.StopDecision.ALLOW_STOP, "ALLOW_STOP")
+    self.assertEqual(types.StopDecision.CONTINUE, "CONTINUE")
+
+  def test_stop_hook_result_defaults(self):
+    res = types.StopHookResult()
+    self.assertEqual(res.decision, types.StopDecision.ALLOW_STOP)
+    self.assertEqual(res.reason, "")
+
+  def test_stop_hook_result_custom(self):
+    res = types.StopHookResult(
+        decision=types.StopDecision.CONTINUE,
+        reason="Needs revision",
+    )
+    self.assertEqual(res.decision, types.StopDecision.CONTINUE)
+    self.assertEqual(res.reason, "Needs revision")
+
+  def test_stop_hook_result_extra_fields_ignored(self):
+    res = types.StopHookResult.model_validate(
+        {"decision": "CONTINUE", "reason": "more work", "extra_field": 123}
+    )
+    self.assertEqual(res.decision, types.StopDecision.CONTINUE)
+    self.assertEqual(res.reason, "more work")
+
+  def test_stop_hook_result_continue_requires_non_empty_reason(self):
+    with self.assertRaisesRegex(ValueError, "requires a non-empty reason"):
+      types.StopHookResult(decision=types.StopDecision.CONTINUE)
+
+    with self.assertRaisesRegex(ValueError, "requires a non-empty reason"):
+      types.StopHookResult(decision=types.StopDecision.CONTINUE, reason="")
+
+    with self.assertRaisesRegex(ValueError, "requires a non-empty reason"):
+      types.StopHookResult(decision=types.StopDecision.CONTINUE, reason="   ")
+
+  def test_stop_args_defaults(self):
+    args = types.StopArgs()
+    self.assertEqual(args.response_text, "")
+    self.assertEqual(args.trajectory_id, "")
+    self.assertEqual(args.continuation_count, 0)
+    self.assertEqual(args.stop_reason, types.StopReason.UNSPECIFIED)
+    self.assertEqual(args.error_message, "")
+
+  def test_stop_args_custom(self):
+    args = types.StopArgs(
+        response_text="All done",
+        trajectory_id="traj_123",
+        continuation_count=2,
+        stop_reason=types.StopReason.MAX_MODEL_CALLS_EXCEEDED,
+        error_message="budget reached",
+    )
+    self.assertEqual(args.response_text, "All done")
+    self.assertEqual(args.trajectory_id, "traj_123")
+    self.assertEqual(args.continuation_count, 2)
+    self.assertEqual(
+        args.stop_reason, types.StopReason.MAX_MODEL_CALLS_EXCEEDED
+    )
+    self.assertEqual(args.error_message, "budget reached")
+
+  def test_stop_args_string_coercion_and_extra_ignored(self):
+    args = types.StopArgs.model_validate({
+        "response_text": "done",
+        "stop_reason": "QUOTA_EXHAUSTED",
+        "unknown_wire_field": "ignore_me",
+    })
+    self.assertEqual(args.response_text, "done")
+    self.assertEqual(args.stop_reason, types.StopReason.QUOTA_EXHAUSTED)
+
+
 if __name__ == "__main__":
   absltest.main()

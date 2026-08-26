@@ -103,6 +103,9 @@ __all__ = [
     "from_bytes",
     "SlashCommand",
     "BuiltinSlashCommandName",
+    "StopDecision",
+    "StopHookResult",
+    "StopArgs",
 ]
 
 # =============================================================================
@@ -1013,6 +1016,68 @@ class AskQuestionInteractionSpec(pydantic.BaseModel):
   model_config = pydantic.ConfigDict(frozen=True, extra="ignore")
 
   questions: list[AskQuestionEntry]
+
+
+class StopDecision(str, enum.Enum):
+  """Decision returned by a Stop lifecycle hook.
+
+  Attributes:
+    ALLOW_STOP: Allows the turn execution to terminate and transition to
+      STATE_FULLY_IDLE.
+    CONTINUE: Blocks termination, injects reason as a system prompt, and resumes
+      the agent execution loop.
+  """
+
+  ALLOW_STOP = "ALLOW_STOP"
+  CONTINUE = "CONTINUE"
+
+
+class StopHookResult(pydantic.BaseModel):
+  """Result returned by a Stop lifecycle hook.
+
+  Attributes:
+    decision: Whether to allow the turn to stop or continue execution.
+    reason: The prompt/feedback injected into the conversation when decision is
+      CONTINUE. Must be non-empty when CONTINUE is selected; otherwise, raises a
+      ValueError. Delivered directly to the model as a system message.
+  """
+
+  model_config = pydantic.ConfigDict(extra="ignore")
+
+  decision: StopDecision = StopDecision.ALLOW_STOP
+  reason: str = ""
+
+  @pydantic.model_validator(mode="after")
+  def _validate_continue_reason(self) -> "StopHookResult":
+    if self.decision == StopDecision.CONTINUE and (
+        not self.reason or not self.reason.strip()
+    ):
+      raise ValueError(
+          "StopHookResult with decision=CONTINUE requires a non-empty reason."
+      )
+    return self
+
+
+class StopArgs(pydantic.BaseModel):
+  """Arguments delivered to a Stop hook when the root turn reaches idle.
+
+  Attributes:
+    response_text: Most recent assistant response text in the turn.
+    trajectory_id: Unique identifier of the trajectory executing this turn.
+    continuation_count: The 0-based iteration count of Stop hook continuations
+      within the current turn cycle.
+    stop_reason: The reason why the trajectory stopped (SDK StopReason enum
+      value).
+    error_message: Error message if execution stopped due to a fatal error.
+  """
+
+  model_config = pydantic.ConfigDict(extra="ignore")
+
+  response_text: str = ""
+  trajectory_id: str = ""
+  continuation_count: int = 0
+  stop_reason: StopReason = StopReason.UNSPECIFIED
+  error_message: str = ""
 
 
 # =============================================================================
