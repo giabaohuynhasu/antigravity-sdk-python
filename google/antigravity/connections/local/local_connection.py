@@ -969,6 +969,9 @@ class LocalConnectionStrategy(connection.ConnectionStrategy):
         if run_cmd_cfg is not None and run_cmd_cfg.timeout_seconds is not None
         else 0
     )
+    enable_sandbox = (
+        run_cmd_cfg.enable_sandbox if run_cmd_cfg is not None else False
+    )
 
     return localharness_pb2.HarnessSideTools(
         subagents=subagents_proto,
@@ -982,6 +985,7 @@ class LocalConnectionStrategy(connection.ConnectionStrategy):
             enabled=types.BuiltinTools.RUN_COMMAND in active_tools,
             enable_daemon_commands=enable_daemon,
             max_timeout_ms=timeout_ms,
+            enable_sandbox=enable_sandbox,
         ),
         file_edit=localharness_pb2.FileEditToolConfig(
             enabled=types.BuiltinTools.EDIT_FILE in active_tools

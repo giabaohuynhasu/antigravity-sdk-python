@@ -174,17 +174,23 @@ class RunCommandConfig(pydantic.BaseModel):
   """Configuration for the builtin run_command tool.
 
   Attributes:
-    enable_daemons: Whether the agent is authorized to start long-running
-      daemon commands (e.g. background dev servers, watchers) using
+    enable_daemons: Whether the agent is authorized to start long-running daemon
+      commands (e.g. background dev servers, watchers) using
       run_command(IsDaemon=True) without blocking session completion. When True,
       the IsDaemon argument is exposed on the run_command tool schema. Defaults
       to False.
-    timeout_seconds: Maximum execution duration in seconds for commands.
-      When None, the default timeout (10 minutes) is used. Defaults to None.
+    timeout_seconds: Maximum execution duration in seconds for commands. When
+      None, the default timeout (10 minutes) is used. Defaults to None.
+    enable_sandbox: When True, terminal commands (run_command) are executed
+      inside the OS-level sandbox (exebox). Forwarded to the harness/cortex,
+      which enforces the sandbox at command execution time. Has no effect on
+      platforms/environments where the sandbox is unavailable. Defaults to
+      False.
   """
 
   enable_daemons: bool = False
   timeout_seconds: float | None = pydantic.Field(default=None, gt=0)
+  enable_sandbox: bool = False
 
 
 class SubagentCapabilities(pydantic.BaseModel):

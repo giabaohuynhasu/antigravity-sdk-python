@@ -794,16 +794,19 @@ class CapabilitiesConfigTest(unittest.TestCase):
     run_cmd_default = types.RunCommandConfig()
     self.assertFalse(run_cmd_default.enable_daemons)
     self.assertIsNone(run_cmd_default.timeout_seconds)
+    self.assertFalse(run_cmd_default.enable_sandbox)
 
     config_custom = types.CapabilitiesConfig(
         run_command_config=types.RunCommandConfig(
             enable_daemons=True,
             timeout_seconds=600.0,
+            enable_sandbox=True,
         )
     )
     self.assertIsNotNone(config_custom.run_command_config)
     self.assertTrue(config_custom.run_command_config.enable_daemons)
     self.assertEqual(config_custom.run_command_config.timeout_seconds, 600.0)
+    self.assertTrue(config_custom.run_command_config.enable_sandbox)
 
     subagent_caps = types.SubagentCapabilities(
         run_command_config=types.RunCommandConfig(timeout_seconds=30.0)

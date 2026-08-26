@@ -1757,7 +1757,10 @@ class LocalConnectionStrategyConfigTest(parameterized.TestCase):
         subagents=localharness_pb2.SubagentsConfig(enabled=False),
         user_questions=localharness_pb2.UserQuestionsConfig(enabled=False),
         run_command=localharness_pb2.RunCommandToolConfig(
-            enabled=False, enable_daemon_commands=False, max_timeout_ms=0
+            enabled=False,
+            enable_daemon_commands=False,
+            max_timeout_ms=0,
+            enable_sandbox=False,
         ),
         find=localharness_pb2.FindToolConfig(enabled=False),
         generate_image=localharness_pb2.GenerateImageToolConfig(enabled=False),
@@ -1820,6 +1823,33 @@ class LocalConnectionStrategyConfigTest(parameterized.TestCase):
         config.harness_side_tools.run_command.max_timeout_ms,
         0,
     )
+
+  def test_capabilities_config_run_command_sandbox_forwarded(self):
+    """Verifies the OS-sandbox opt-in maps onto RunCommandToolConfig.
+
+    Why: The ACP server sets run_command_config.enable_sandbox to honor the
+    enterprise PROCEED_IN_SANDBOX / sandbox_mode admin controls; it must reach
+    the harness/cortex over the wire.
+    """
+    strategy = self._make_strategy(
+        capabilities_config=types.CapabilitiesConfig(
+            run_command_config=types.RunCommandConfig(enable_sandbox=True),
+        )
+    )
+    config = strategy._build_harness_config()
+
+    run_command = config.harness_side_tools.run_command
+    self.assertTrue(run_command.enabled)
+    self.assertTrue(run_command.enable_sandbox)
+
+  def test_capabilities_config_run_command_sandbox_defaults_off(self):
+    strategy = self._make_strategy(
+        capabilities_config=types.CapabilitiesConfig()
+    )
+    config = strategy._build_harness_config()
+
+    run_command = config.harness_side_tools.run_command
+    self.assertFalse(run_command.enable_sandbox)
 
   def test_capabilities_config_max_subagent_depth_and_allowed_subagents(self):
     """Verifies max_subagent_depth and allowed_subagents map to SubagentsConfig."""
