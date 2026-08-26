@@ -194,6 +194,9 @@ async def main() -> None:
           on_stop,
       ],
       tools=[greet, broken_tool],
+      capabilities=types.CapabilitiesConfig(
+          agent_behavior=types.AgentBehavior.INTERACTIVE,
+      ),
   )
 
   async with Agent(config) as my_agent:

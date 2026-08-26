@@ -159,6 +159,7 @@ Hooks are registered when creating the `LocalAgentConfig`.
 
 ```python
 from google.antigravity.connections.local import LocalAgentConfig
+from google.antigravity import types
 
 config = LocalAgentConfig(
     hooks=[
@@ -173,5 +174,8 @@ config = LocalAgentConfig(
         on_compact,
         on_interact,
     ],
+    capabilities=types.CapabilitiesConfig(
+        agent_behavior=types.AgentBehavior.INTERACTIVE,
+    ),
 )
 ```

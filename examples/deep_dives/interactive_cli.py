@@ -133,6 +133,7 @@ async def run():
       policies=[policy.ask_user("*", handler=interactive.ask_user_handler)],
       hooks=[interactive.AskQuestionHook()],
       capabilities=types.CapabilitiesConfig(
+          agent_behavior=types.AgentBehavior.INTERACTIVE,
           disabled_tools=disabled_tools,
       ),
       model=_MODEL_NAME.value,
