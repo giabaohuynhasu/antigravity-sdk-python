@@ -642,6 +642,7 @@ message CallHookRequest {
   string request_id = 1;
   string name = 2;
   .antigravity.localharness.LifecycleHook type = 7;
+  string client_id = 11;
 }
 message CallHookResponse {
   oneof result {
