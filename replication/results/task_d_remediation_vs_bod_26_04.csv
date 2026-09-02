@@ -1,0 +1,5 @@
+era_or_cohort,policy_framework,mandated_deadline_days,mu_policy_rate_per_day,empirical_median_mttr_days,mu_realized_rate_per_day,compliance_gap_ratio,divergence_verdict
+Pre-KEV Baseline (2018-2020),Voluntary / Internal SLA,60.0,0.0167,44.0,0.0227,0.73,Realized within policy SLA
+BOD 22-01 Phase 1 (2021-2023),CISA KEV Standard Mandate,21.0,0.0476,25.0,0.04,1.19,Slight bottleneck (1.19x lag)
+BOD 22-01 Phase 2 (2024-2025),CISA KEV Critical Edge,14.0,0.0714,21.0,0.0476,1.5,Moderate strain (1.50x lag)
+BOD 26-04 Active Mandate (June 2026+),CISA BOD 26-04 Cloud/Edge Active Exploit,3.0,0.3333,19.5,0.0513,6.5,SEVERE STRUCTURAL DISCONNECT (6.50x capacity deficit)
