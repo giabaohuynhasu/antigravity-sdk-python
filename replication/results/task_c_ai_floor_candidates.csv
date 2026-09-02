@@ -1,0 +1,9 @@
+quarter,date,frontier_cost_per_1m_tokens_usd,distilled_floor_cost_usd,cost_deflation_ratio,us_census_btos_ai_adoption_pct,candidate1_status
+2023-Q1,2023-03-31,30.0,30.0,1.0,3.7,Baseline (GPT-4 Launch)
+2023-Q3,2023-09-30,30.0,2.0,15.0,4.4,GPT-3.5-Turbo Turbo Drop
+2024-Q1,2024-03-31,20.0,0.5,40.0,5.4,Claude 3 Haiku / Gemini Flash
+2024-Q3,2024-09-30,15.0,0.15,100.0,6.1,Gemini 1.5 Flash-8B / GPT-4o-mini
+2025-Q1,2025-03-31,10.0,0.08,125.0,7.9,DeepSeek-V3 / Open Distillations
+2025-Q3,2025-09-30,6.0,0.04,150.0,9.8,Ultra-lightweight reasoning edge
+2026-Q1,2026-03-31,3.0,0.02,150.0,12.3,Commoditized Frontier Floor
+2026-Q3,2026-08-31,2.0,0.01,200.0,14.7,Near-Zero Cost Floor
