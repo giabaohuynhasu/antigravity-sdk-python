@@ -1,4 +1,4 @@
-# Copyright 2026 Google LLC
+# Copyright 2026 Google LLC & Gia Bao Huynh (Jun)
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,21 +18,27 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "google-antigravity"
-version = "0.1.15"
-description = "Google Antigravity SDK for building AI agents"
+version = "0.2.0"
+description = "Google Antigravity Python SDK for Autonomous AI Agents, Multi-Agent Claude Bridges, and Scientific Research"
 readme = "README.md"
 license = {text = "Apache-2.0"}
 requires-python = ">=3.10"
-authors = [{name = "Google LLC"}]
+authors = [
+    {name = "Google LLC"},
+    {name = "Gia Bao Huynh (Jun)", email = "huynhbao@asu.edu"}
+]
 classifiers = [
-    "Development Status :: 3 - Alpha",
+    "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
     "License :: OSI Approved :: Apache Software License",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
 ]
 dependencies = [
     "absl-py",
@@ -42,28 +48,26 @@ dependencies = [
     "uvicorn>=0.46",
     "websockets>=12.0",
     "protobuf>=7.35",
+    "duckdb>=1.0.0",
+    "scipy>=1.10.0",
+    "pandas>=2.0.0",
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=7.0"]
+dev = [
+    "pytest>=7.0",
+    "grpcio-tools>=1.60.0",
+]
 otel = [
     "opentelemetry-api",
     "opentelemetry-sdk",
 ]
 
 [project.urls]
-Homepage = "https://github.com/Google-Antigravity/antigravity-sdk-python"
+Homepage = "https://github.com/giabaohuynhasu/antigravity-sdk-python"
+Repository = "https://github.com/giabaohuynhasu/antigravity-sdk-python"
+Documentation = "https://giabaohuynhasu.github.io/research-landing/"
 
-# The Copybara export places the SDK source at the repo root under the
-# google/antigravity/ namespace package. setuptools auto-discovers all
-# google.antigravity.* subpackages.
 [tool.setuptools.packages.find]
+where = ["."]
 include = ["google*"]
-
-# Include the pre-compiled Go binary in the wheel.
-# The release script places the platform-appropriate binary at
-# google/antigravity/bin/localharness before building each wheel.
-[tool.setuptools.package-data]
-"google.antigravity.bin" = ["*"]
-
-
