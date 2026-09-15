@@ -1083,16 +1083,12 @@ class LocalConnectionStrategy(connection.ConnectionStrategy):
     elif self._tool_runner:
       # Fallback when _tools is not explicitly specified: exclude tools
       # exclusive to subagents.
-      subagent_tool_names = set()
-      for sa in self._subagents:
-        for t in sa.tools or []:
-          if isinstance(t, str):
-            subagent_tool_names.add(t)
-          elif callable(t):
-            subagent_proto = callable_to_tool_proto(
-                t, tool_runner=self._tool_runner
-            )
-            subagent_tool_names.add(subagent_proto.name)
+      subagent_tool_names = {
+          t if isinstance(t, str) else callable_to_tool_proto(t, tool_runner=self._tool_runner).name
+          for sa in self._subagents
+          for t in (sa.tools or [])
+          if isinstance(t, str) or callable(t)
+      }
       root_tool_protos = [
           proto
           for name, proto in all_tool_protos.items()
