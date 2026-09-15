@@ -73,12 +73,16 @@ class SparkEmailTool:
         body: str,
         recipient: str = "huynhbao@asu.edu",
         sender_email: str = "thuaquan228@gmail.com",
-        app_password: str = "tftgqgjmfifdmtzz"
+        app_password: Optional[str] = None
     ) -> ResearchToolResult:
         """Send an email report via Gmail TLS Relay."""
         import smtplib
         from email.mime.text import MIMEText
         from email.utils import formataddr
+
+        app_password = app_password or os.environ.get("GMAIL_APP_PASSWORD")
+        if not app_password:
+            return ResearchToolResult(output="", success=False, error="No app_password provided or found in GMAIL_APP_PASSWORD env var.")
 
         try:
             msg = MIMEText(body, "plain", "utf-8")
