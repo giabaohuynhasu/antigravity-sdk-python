@@ -18,8 +18,6 @@ Defines the types used to configure model backends: which models to use,
 how to authenticate, and model-specific options like thinking level.
 """
 
-from __future__ import annotations
-
 import abc
 import enum
 import os
