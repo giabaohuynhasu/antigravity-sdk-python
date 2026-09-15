@@ -73,7 +73,7 @@ class SparkEmailTool:
         body: str,
         recipient: str = "huynhbao@asu.edu",
         sender_email: str = "thuaquan228@gmail.com",
-        app_password: str = "tftgqgjmfifdmtzz"
+        app_password: Optional[str] = None
     ) -> ResearchToolResult:
         """Send an email report via Gmail TLS Relay."""
         import smtplib
@@ -81,6 +81,14 @@ class SparkEmailTool:
         from email.utils import formataddr
 
         try:
+            pwd = app_password or os.environ.get("GMAIL_APP_PASSWORD")
+            if not pwd:
+                return ResearchToolResult(
+                    output="",
+                    success=False,
+                    error="No application password provided. Set GMAIL_APP_PASSWORD environment variable or pass app_password."
+                )
+
             msg = MIMEText(body, "plain", "utf-8")
             msg["From"] = formataddr(("Antigravity Research OS", sender_email))
             msg["To"] = formataddr(("Gia Bao Huynh (Jun)", recipient))
@@ -88,7 +96,7 @@ class SparkEmailTool:
 
             with smtplib.SMTP("smtp.gmail.com", 587) as server:
                 server.starttls()
-                server.login(sender_email, app_password)
+                server.login(sender_email, pwd)
                 server.send_message(msg)
             return ResearchToolResult(output=f"[✓ Email successfully sent to {recipient}]", success=True)
         except Exception as e:
