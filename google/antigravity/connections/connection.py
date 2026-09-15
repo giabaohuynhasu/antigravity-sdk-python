@@ -146,19 +146,16 @@ class AgentConfig(abc.ABC, pydantic.BaseModel):
         v, (str, bytes)
     ):
       v = [v]
-    flat_policies = []
-
     def flatten(item):
       if isinstance(item, (list, tuple, Sequence)) and not isinstance(
           item, (str, bytes)
       ):
         for sub_item in item:
-          flatten(sub_item)
+          yield from flatten(sub_item)
       else:
-        flat_policies.append(item)
+        yield item
 
-    flatten(v)
-    return flat_policies
+    return list(flatten(v))
 
   def model_copy(
       self, *, update: Mapping[str, Any] | None = None, deep: bool = False
