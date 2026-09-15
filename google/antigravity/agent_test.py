@@ -816,6 +816,29 @@ class AgentTest(unittest.IsolatedAsyncioTestCase):
     async with agent.Agent(config) as ag:
       self.assertEqual(ag.conversation, mock_conversation)
 
+  @mock.patch(
+      "google.antigravity.connections."
+      "local.local_connection.LocalConnectionStrategy"
+  )
+  @mock.patch.object(conversation.Conversation, "create")
+  async def test_agent_aenter_exception_closes_exit_stack(self, mock_conv_create, mock_strategy_class):
+    """Verifies that exceptions during __aenter__ close the exit stack and re-raise."""
+    mock_conv_create.side_effect = RuntimeError("Failed to create conversation")
+
+    mock_strategy_instance = mock.MagicMock()
+    mock_strategy_class.return_value = mock_strategy_instance
+
+    config = local_connection.LocalAgentConfig(system_instructions="test")
+    ag = agent.Agent(config)
+
+    mock_exit_stack = mock.AsyncMock(spec=contextlib.AsyncExitStack)
+    ag._exit_stack = mock_exit_stack
+
+    with self.assertRaisesRegex(RuntimeError, "Failed to create conversation"):
+      await ag.__aenter__()
+
+    mock_exit_stack.aclose.assert_awaited_once()
+
   async def test_agent_aexit_passes_exceptions(self):
     config = local_connection.LocalAgentConfig(system_instructions="test")
     ag = agent.Agent(config)
