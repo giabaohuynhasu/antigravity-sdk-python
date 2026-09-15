@@ -848,6 +848,30 @@ class AgentTest(unittest.IsolatedAsyncioTestCase):
     self.assertTrue(suppressed)
     mock_exit_stack.__aexit__.assert_called_once_with(ValueError, exc, None)
 
+  @mock.patch(
+      "google.antigravity.connections."
+      "local.local_connection.LocalConnectionStrategy"
+  )
+  @mock.patch.object(conversation.Conversation, "create")
+  async def test_agent_start_error_cleanup(self, mock_conv_create, mock_strategy_class):
+    mock_strategy_instance = mock.MagicMock()
+    mock_strategy_instance.stop = mock.AsyncMock()
+    mock_strategy_class.return_value = mock_strategy_instance
+
+    mock_conv_create.side_effect = RuntimeError("Failed to create conversation")
+
+    config = local_connection.LocalAgentConfig(system_instructions="test")
+    ag = agent.Agent(config)
+
+    # Need to intercept aclose before starting session
+    mock_aclose = mock.AsyncMock()
+    ag._exit_stack.aclose = mock_aclose
+
+    with self.assertRaisesRegex(RuntimeError, "Failed to create conversation"):
+        await ag.__aenter__()
+
+    mock_aclose.assert_called_once()
+
 
 class AgentConfigTest(unittest.IsolatedAsyncioTestCase):
   """Tests for AgentConfig sugar, conflict guards, and defensive copy."""
