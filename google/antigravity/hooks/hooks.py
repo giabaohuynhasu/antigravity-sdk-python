@@ -28,8 +28,6 @@ The context can be placed in any position (first or second).
 
 """
 
-from __future__ import annotations
-
 import abc
 import functools
 import inspect
@@ -48,7 +46,7 @@ from google.antigravity.utils import state as state_module
 class HookContext(state_module.StateStore):
   """Base context for hooks to share state."""
 
-  def __init__(self, parent: HookContext | None = None):
+  def __init__(self, parent: "HookContext | None" = None):
     super().__init__(parent=parent)
 
 
