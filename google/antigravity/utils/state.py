@@ -14,8 +14,6 @@
 
 """Thread-safe hierarchical key-value store for extensibility contexts."""
 
-from __future__ import annotations
-
 import threading
 from typing import Any, Callable
 
@@ -29,7 +27,7 @@ class StateStore:
   ``ToolContext`` and ``HookContext``.
   """
 
-  def __init__(self, parent: StateStore | None = None) -> None:
+  def __init__(self, parent: 'StateStore | None' = None) -> None:
     """Initializes the StateStore.
 
     Args:
@@ -109,7 +107,7 @@ class StateStore:
     """
     return self._lock
 
-  def __enter__(self) -> StateStore:
+  def __enter__(self) -> 'StateStore':
     """Acquires the store lock for use in a `with` statement."""
     self._lock.acquire()
     return self
