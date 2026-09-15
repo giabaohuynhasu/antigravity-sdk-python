@@ -30,8 +30,6 @@ Includes:
   confirmation before executing a tool call.
 """
 
-from __future__ import annotations
-
 import asyncio
 import contextvars
 import sys
@@ -44,8 +42,8 @@ from google.antigravity.hooks import hooks
 from google.antigravity.hooks import policy as policy_module
 from google.antigravity.types import QuestionResponse
 
-_global_active_spinner: Spinner | None = None
-_active_spinner: contextvars.ContextVar[Spinner | None] = (
+_global_active_spinner: 'Spinner | None' = None
+_active_spinner: contextvars.ContextVar['Spinner | None'] = (
     contextvars.ContextVar("_active_spinner", default=None)
 )
 
@@ -135,7 +133,7 @@ class Spinner:
     self._task = asyncio.create_task(self._spin())
 
   @classmethod
-  def get_active(cls) -> Spinner | None:
+  def get_active(cls) -> 'Spinner | None':
     """Returns the currently active Spinner instance, if any."""
     return _active_spinner.get() or _global_active_spinner
 
