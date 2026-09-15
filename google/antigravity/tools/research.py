@@ -36,9 +36,8 @@ class NotebookLMTool:
                 error="nlm.exe not found at C:/Users/nswcl/.local/bin/nlm.exe"
             )
         try:
-            cmd = f'& "{self.nlm_path}" query "{nid}" "{prompt}"'
             proc = subprocess.run(
-                ["powershell.exe", "-NoProfile", "-Command", cmd],
+                [str(self.nlm_path), "query", nid, prompt],
                 capture_output=True,
                 text=True,
                 timeout=60
