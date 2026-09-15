@@ -15,13 +15,15 @@
 """LiteRT Agent Config."""
 
 import enum
-from typing import Any, Callable
+from typing import Any, Callable, TYPE_CHECKING
 
 import pydantic
 
 from google.antigravity import types
-from google.antigravity.connections import connection
 from google.antigravity.connections.local.local_connection_config import BaseLocalAgentConfig
+
+if TYPE_CHECKING:
+  from google.antigravity.connections import connection
 from google.antigravity.hooks import hooks as hooks_mod
 from google.antigravity.hooks import policy
 from google.antigravity.triggers import triggers as triggers_mod
