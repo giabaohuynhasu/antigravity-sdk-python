@@ -52,12 +52,16 @@ class NotebookLMTool:
 class DuckDBSQLTool:
     """Tool for executing high-speed SQL queries directly against memory or CSV/Parquet files."""
 
+    _con = None
+
     def execute(self, sql_query: str) -> ResearchToolResult:
         """Execute a DuckDB SQL query and return tabular markdown string."""
         try:
-            import duckdb
-            con = duckdb.connect()
-            df = con.execute(sql_query).df()
+            if self.__class__._con is None:
+                import duckdb
+                self.__class__._con = duckdb.connect()
+
+            df = self.__class__._con.execute(sql_query).df()
             out = df.to_markdown(index=False) if hasattr(df, "to_markdown") else df.to_string(index=False)
             return ResearchToolResult(output=out, success=True)
         except Exception as e:
