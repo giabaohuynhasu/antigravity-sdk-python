@@ -19,8 +19,6 @@ session. It reacts to external events (cron, file changes, webhooks)
 and pushes messages back into the agent.
 """
 
-from __future__ import annotations
-
 import enum
 import inspect
 from typing import Awaitable, Callable, Protocol
