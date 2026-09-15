@@ -108,6 +108,28 @@ class LocalOpenAIConnectionTest(unittest.TestCase):
     self.assertEqual(config_openai.policies[0].tool, "run_command")
     self.assertEqual(config_openai.policies[1].tool, "*")
 
+  def test_local_openai_config_init(self):
+    """Verify LocalOpenAIAgentConfig initialization correctly updates attributes."""
+    valid_uuid = "a" * 32
+    config = local_openai_connection_config.LocalOpenAIAgentConfig(
+        model="test-model", base_url="http://test.url", conversation_id=valid_uuid
+    )
+    self.assertEqual(config.model, "test-model")
+    self.assertEqual(config.base_url, "http://test.url")
+    self.assertEqual(config.conversation_id, valid_uuid)
+
+  def test_local_openai_config_init_kwargs(self):
+    """Verify LocalOpenAIAgentConfig initialization properly handles kwargs."""
+    config = local_openai_connection_config.LocalOpenAIAgentConfig(
+        model="test-model",
+        base_url="http://test.url",
+        custom_field="custom_value",
+        app_data_dir="/tmp/custom_dir"
+    )
+    self.assertEqual(config.model, "test-model")
+    self.assertEqual(config.base_url, "http://test.url")
+    self.assertEqual(config.app_data_dir, "/tmp/custom_dir")
+
   def test_local_openai_config_mcp_servers_and_subagents_passed_to_strategy(
       self,
   ):
